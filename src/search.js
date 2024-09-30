@@ -45,11 +45,7 @@ function hideLoader() {
   document.querySelector('.loading-spinner').style.display = 'none';
 }
 
-form.addEventListener('submit', event => {
-  event.preventDefault();
-
-  const queryInput = form.querySelector('.search-input').value.trim();
-
+function buildApiUrl(queryInput) {
   const params = new URLSearchParams({
     key: API_KEY,
     q: queryInput,
@@ -58,7 +54,28 @@ form.addEventListener('submit', event => {
     safesearch: true,
   });
 
-  const url = `${BASE_URL}?${params.toString()}`;
+  return `${BASE_URL}?${params.toString()}`;
+}
+
+function createGallery(images) {
+  const imagesMarkup = images.map(image => createImageCard(image)).join('');
+  gallery.innerHTML = imagesMarkup;
+}
+
+function useLightbox() {
+  const lightbox = new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
+  lightbox.refresh();
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+
+  const queryInput = form.querySelector('.search-input').value.trim();
+
+  const url = buildApiUrl(queryInput);
 
   gallery.innerHTML = '';
 
@@ -84,14 +101,8 @@ form.addEventListener('submit', event => {
         return;
       }
 
-      const imagesMarkup = images.map(image => createImageCard(image)).join('');
-      gallery.innerHTML = imagesMarkup;
-
-      const lightbox = new SimpleLightbox('.gallery a', {
-        captionsData: 'alt',
-        captionDelay: 250,
-      });
-      lightbox.refresh();
+      createGallery(images);
+      useLightbox();
     })
     .catch(error => {
       console.log(error);
